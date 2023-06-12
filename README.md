@@ -1,4 +1,4 @@
-# wildnetR
+# enetwildIVT
 
 enetwildIVT is an R package that contain a golemized shinyapp to validate the harmonized databases provided by the partners of the ENEWTILD proyect.
 
