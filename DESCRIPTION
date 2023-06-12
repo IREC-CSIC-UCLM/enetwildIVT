@@ -1,0 +1,22 @@
+Package: enetwildIVT
+Title: ENETWILD-IVT
+Version: 0.5.0
+Authors@R: 
+    person("Sergio", "López", , "sergio.lopez@uclm.es", role = c("cre", "aut"))
+Description: Rpackage that contains the Integrated Validation Tool for the
+    ENETWILD project.
+License: MIT + file LICENSE
+Imports: 
+    config (>= 0.3.1),
+    dplyr,
+    golem (>= 0.3.3),
+    pkgload,
+    purrr,
+    readxl,
+    sf,
+    shiny (>= 1.7.2),
+    shinyjs,
+    uuid
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
