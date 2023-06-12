@@ -4,7 +4,7 @@ enetwildIVT is an R package that contain a golemized shinyapp to validate the ha
 
 ## Installation
 
-You can install wildnetR from GitHub using the devtools package:
+You can install enetwildR from GitHub using the devtools package:
 
 ```r
 devtools::install_github("IREC-CSIC-UCLM/enetwildIVT")
