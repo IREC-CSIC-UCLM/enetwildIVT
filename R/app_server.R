@@ -13,12 +13,12 @@ app_server <- function(input, output, session) {
   options(shiny.maxRequestSize = 30 * 1024^5) # to let them upload large data
 
   # Load code for all tabpages
-  source(file.path("inst/tabs/dataSubmitTab_server.R"), local = TRUE)
+  source(file.path("inst/app/tabs/dataSubmitTab_server.R"), local = TRUE)
 
   # Show tabpanels
   output$tabPanels <- renderUI({
     allTabs <- list(
-      ivt = source(file.path("inst/tabs/dataSubmitTab_ui.R"), local = TRUE)$value
+      ivt = source(file.path("inst/app/tabs/dataSubmitTab_ui.R"), local = TRUE)$value
     )
 
     # Unnaming tabs
