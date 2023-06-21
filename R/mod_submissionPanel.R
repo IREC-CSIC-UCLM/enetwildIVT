@@ -38,10 +38,12 @@ mod_submissionPanel_ui <- function(id){
                             selected = "shp")
         ),
         column(6,
-               selectInput(ns("num_shapefiles"), "Number of spatial file:", choices = "1")
+               selectInput(ns("num_shapefiles"), "Number of spatial files:", choices = c(1:10), selected = 1)
                #selectInput(ns("shapefile_id"), "Prueba para ver unique values del xlsx", choices = NULL)
-               )
+        )
       ),
+
+      uiOutput(ns("shapefile_inputs")),
 
       fluidRow(
         column(6,
@@ -117,6 +119,7 @@ mod_submissionPanel_server <- function(id){
         updateSelectInput(inputId = "shapefile_id", choices = unique(na.omit(draftEW_uploaded$locationAccordingTo)), selected = "") #
       }
     })
+
 
     #Shape
     observeEvent(input$shape_file, {
@@ -228,4 +231,3 @@ mod_submissionPanel_server <- function(id){
     })
   })
 }
-

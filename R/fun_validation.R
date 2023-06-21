@@ -403,20 +403,22 @@ validate_match <- function(data_uploaded, shape_uploaded, id_column, id_column_s
 
   # Check if there is a match between the two
   if (all(data_locationIDs %in% shape_IDs)) {
-    correct_message <- "All of the locations ID have a corresponding WKT"
+    correct_message <- "All of the location IDs have a corresponding shape in the shape file."
     return(list(TRUE, correct_message))
   } else {
     missing_locationIDs <- setdiff(data_locationIDs, shape_IDs)
     if (length(missing_locationIDs) == length(data_locationIDs)) {
-      error_message <- "None of the locationIDs in the uploaded data match with the selected ID column in the shapefile."
+      error_message <- "None of the location IDs in the uploaded data match with the selected ID column in the shape file."
       return(list(FALSE, error_message))
     } else {
-      warning_message <- paste("Some locationIDs in the uploaded data do not have a corresponding shape in the selected shapefile. These locationIDs are:",
+      warning_message <- paste("Some location IDs in the uploaded data do not have a corresponding shape in the selected shape file. These location IDs are:",
                                paste(missing_locationIDs, collapse = ", "))
       return(list(TRUE, warning_message))
     }
   }
 }
+
+
 
 #' Check Completeness of Columns
 #'
@@ -507,6 +509,7 @@ check_vocabulary_data <- function(data, vocabulary) {
     col_values <- data[[col_name]]
 
     if (!is.null(col_values) && !all(is.na(col_values))) {
+      col_values <- col_values[!is.na(col_values)]
       invalid_values <- col_values[!col_values %in% allowed_values]
 
       if (length(invalid_values) > 0) {

@@ -55,9 +55,14 @@ read_excel_allsheets <- function(filename, tibble = FALSE) {
 #'
 #' @export
 fromshapetowkt <- function(data, shape, id_data_colmn, id_shape_colmn, geom_colmn) {
+  shape_short <- dplyr::select(shape, id_shape_colmn, geom_colmn)
+  shape_short <- dplyr::rename(shape_short, "locationID" = id_shape_colmn)
 
-  shape_short <- dplyr::select(shape,id_shape_colmn, geom_colmn)
-  shape_short <- dplyr::rename(shape_short,"locationID" = id_shape_colmn)
+  # Check if there are any matching locationIDs
+  if (length(intersect(data[[id_data_colmn]], shape_short$locationID)) == 0) {
+    warning("None of the location IDs in the uploaded data match with the selected ID column in the shape file.")
+    return(data)
+  }
 
   # Merge data and shape based on matching columns
   merged_data_sf <- merge(data, shape_short, by = "locationID", all.x = TRUE)
@@ -65,6 +70,8 @@ fromshapetowkt <- function(data, shape, id_data_colmn, id_shape_colmn, geom_colm
 
   # Assign CRS from shape file to merged_data_sf
   sf::st_crs(merged_data_sf) <- sf::st_crs(shape)
+
+  merged_data_sf <- st_transform(merged_data_sf, 3035)
 
   # Return the merged data with the WKT column
   return(merged_data_sf)

@@ -52,7 +52,7 @@ mod_dataValidate_server <- function(id){
         shape_uploaded <- read_gpkg_global(input$shape_file)
       }
 
-      # adding geom
+      # adding geom #puede estar aqui?
       draftEW_uploaded <- fromshapetowkt(draftEW_uploaded, shape_uploaded, "locationID", input$id_column, input$geom_column)
 
       # checking geom
