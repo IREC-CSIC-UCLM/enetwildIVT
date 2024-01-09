@@ -1,31 +1,46 @@
+# Project: enetwildDET
+#
+# Author: shevelp(sergio.lopez@uclm.es)
+#
+# server file: globalFunction, conditional rendering and tabs-server logic
+###############################################################################
+
+
 #' The application server-side
 #'
 #' @param input,output,session Internal parameters for {shiny}.
 #'     DO NOT REMOVE.
 #' @import shiny
-#'
 #' @noRd
-#'
+app_server <- function(input, output, session, dockerVolume  = '/opt/enetwildIVT') {
 
-#en lugar de llamar a las tabs, que las llame como módulos!
-app_server <- function(input, output, session) {
+  options(shiny.maxRequestSize = 1000 * 1024^5) #define new upload maxSize
 
-  options(shiny.maxRequestSize = 30 * 1024^5) # to let them upload large data
-
-  # Load code for all tabpages
-  source(file.path("inst/app/tabs/dataSubmitTab_server.R"), local = TRUE)
-
-  # Show tabpanels
-  output$tabPanels <- renderUI({
-    allTabs <- list(
-      ivt = source(file.path("inst/app/tabs/dataSubmitTab_ui.R"), local = TRUE)$value
-    )
-
-    # Unnaming tabs
-    names(allTabs) <- NULL
-
-    do.call(tabsetPanel, c(id = "tabs", allTabs))
+  # Manual download #
+  observeEvent(input$manualLink, {
+    showModal(modalDialog(
+      tags$iframe(src = "www/enetwildDET-manual.pdf",
+                  width = 860, height = 600),
+      size = "l", easyClose = TRUE
+    ))
 
   })
+
+  # BASE TABSETPANEL
+    output$tabPanels <- renderUI({
+        tabsetPanel(
+          id = "tabs",
+          tabPanel("Data-submit tab", mod_submitData_ui("dataSubmit")) #Submit tab
+        )
+      })
+
+  ################
+  # Modules/TABS #
+  ################
+
+  # Tab About #
+    mod_submitData_server(id = "dataSubmit",
+                      dockerVolume = dockerVolume)
+
 
 }

@@ -71,7 +71,7 @@ fromshapetowkt <- function(data, shape, id_data_colmn, id_shape_colmn, geom_colm
   # Assign CRS from shape file to merged_data_sf
   sf::st_crs(merged_data_sf) <- sf::st_crs(shape)
 
-  merged_data_sf <- st_transform(merged_data_sf, 3035)
+  merged_data_sf <- sf::st_transform(merged_data_sf, 3035)
 
   # Return the merged data with the WKT column
   return(merged_data_sf)
@@ -116,7 +116,7 @@ read_data_global <- function(inFile_DATA) {
 #' @export
 read_gpkg_global <- function(inFile_GPKG) {
   file_path <- inFile_GPKG$datapath
-  gpkg_data <- read_sf(file_path)
+  gpkg_data <- sf::read_sf(file_path)
   return(gpkg_data)
 }
 

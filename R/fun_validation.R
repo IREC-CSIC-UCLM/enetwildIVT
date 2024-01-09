@@ -27,7 +27,6 @@
 #' revised_by_institution <- "Example Institution"
 #' version <- "1.0"
 #' shape_format <- "wktxy"
-#' num_shapefiles <- 2
 #' data_file <- "data.csv"
 #' shape_file <- "shapefile.zip"
 #' id_column <- "ID"
@@ -53,23 +52,19 @@ submission_panel_test <- function(revised_by_surname, revised_by_lastname,
   error_list <- c()
 
   if (revised_by_surname == "") {
-    error_list <- c(error_list, "Surname of the reviser")
+    error_list <- c(error_list, "Name of the reviewer")
   }
 
   if (revised_by_lastname == "") {
-    error_list <- c(error_list, "Lastname of the reviser")
+    error_list <- c(error_list, "Lastname of the reviewer")
   }
 
   if (revised_by_mail == "") {
-    error_list <- c(error_list, "email of the reviser")
+    error_list <- c(error_list, "email of the reviewer")
   }
 
   if (revised_by_institution == "") {
     error_list <- c(error_list, "Name of the institution")
-  }
-
-  if (version == "") {
-    error_list <- c(error_list, "Version")
   }
 
   if (is.null(shape_format)) {
