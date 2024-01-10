@@ -1,4 +1,4 @@
-# Project: enetwildDET
+# Project: enetwildIVT
 #
 # Author: shevelp(sergio.lopez@uclm.es)
 #
@@ -26,11 +26,17 @@ app_server <- function(input, output, session, dockerVolume  = '/opt/enetwildIVT
 
   })
 
+
+  #Executing global.R copy files to dockerVolume
+  globalFunction()
+
+  # Admin control using shinyproxy here! 2.0
+
   # BASE TABSETPANEL
     output$tabPanels <- renderUI({
         tabsetPanel(
           id = "tabs",
-          tabPanel("Data-submit tab", mod_submitData_ui("dataSubmit")) #Submit tab
+          tabPanel("Data Submit tab", mod_submitData_ui("dataSubmit")) #Submit tab
         )
       })
 

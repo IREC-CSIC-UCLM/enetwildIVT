@@ -1,3 +1,10 @@
+# Project: enetwildIVT
+#
+# Author: shevelp(sergio.lopez@uclm.es)
+#
+# mod_submitData
+###############################################################################
+
 #' submitData UI Function
 #'
 #' @description A shiny Module.
@@ -154,7 +161,12 @@ mod_submitData_server <- function(id,dockerVolume){
                              shape_uploaded = NULL,
                              shape_uploaded_raw = NULL,
                              draftEW_uploaded_export = NULL,
-                             data_uploaded_raw = NULL)
+                             data_uploaded_raw = NULL,
+                             output_zip_export = NULL,
+                             dsa_file_raw = NULL,
+                             report_text_submissionPanel = NULL,
+                             report_text_metadata = NULL,
+                             report_text_data = NULL)
 
     # Close btn from the modal
     observeEvent(input$close_btn, {
@@ -167,7 +179,7 @@ mod_submitData_server <- function(id,dockerVolume){
         "WLDM.xlsx"
       },
       content = function(file) {
-        file.copy("inst/extdata/WLDM.xlsx", file)
+        file.copy(paste0(dockerVolume,"/WLDM.xlsx", file))
       }
     )
 
@@ -219,16 +231,18 @@ mod_submitData_server <- function(id,dockerVolume){
       if (!is.null(input$shape_file)) {
 
         if (input$shape_format == "shp") {
-          shape_uploaded <- read_shapefile(input$shape_file)
+          shape <- read_shapefile(input$shape_file)
         } else if (input$shape_format == "gpkg") {
-          shape_uploaded <- read_gpkg_global(input$shape_file)
+          shape <- read_gpkg_global(input$shape_file)
         }
+
+        values$shape_uploaded <- shape
       }
 
-      values$shape_uploaded <- shape_uploaded
 
-      updateSelectInput(inputId = "id_column", choices = names(shape_uploaded), selected = "")
-      updateSelectInput(inputId = "geom_column", choices = names(shape_uploaded), selected = "")
+
+      updateSelectInput(inputId = "id_column", choices = names(values$shape_uploaded), selected = "")
+      updateSelectInput(inputId = "geom_column", choices = names(values$shape_uploaded), selected = "")
 
     })
 
@@ -324,6 +338,9 @@ mod_submitData_server <- function(id,dockerVolume){
                                              "Validate Metadata",
                                              "action")
         submission_report
+
+        # Text for report
+        values$report_text_submissionPanel  <- report_text_submissionPanel
       }
     })
 
@@ -389,6 +406,10 @@ mod_submitData_server <- function(id,dockerVolume){
                                            "action")
         metadata_report
 
+        # Text for report
+        values$report_text_metadata  <- report_text_metadata
+
+
         # Generate df for .csv metadata
         #------------------------------
 
@@ -403,12 +424,12 @@ mod_submitData_server <- function(id,dockerVolume){
 
         if (input$data_agreement_selection == "Yes") {
           metadata_uploaded$dsaFile <- input$data_agreement$name
-          dsa_file_raw <<- input$data_agreement$datapath
+          values$dsa_file_raw <- input$data_agreement$datapath
         } else {
           metadata_uploaded$dsaFile <- NA
         }
 
-        metadata_uploaded_export <- metadata_uploaded
+        values$metadata_uploaded_export <- metadata_uploaded
 
       }
 
@@ -465,17 +486,17 @@ mod_submitData_server <- function(id,dockerVolume){
       if (!input$shape_format == "wktxy") {
 
         # Adding geom
-        draftEW_uploaded <- fromshapetowkt(draftEW_uploaded, shape_uploaded, "locationID", input$id_column, input$geom_column)
+        draftEW_uploaded <- fromshapetowkt(draftEW_uploaded, values$shape_uploaded, "locationID", input$id_column, input$geom_column)
 
         # Checking geom
-        spatial_union_check <- validate_match(draftEW_uploaded, shape_uploaded, "locationID", input$id_column)
+        spatial_union_check <- validate_match(draftEW_uploaded, values$shape_uploaded, "locationID", input$id_column)
 
         # Appending reports
         data_check <- append(data_check, spatial_union_check)
 
         #global shape
-        shape_uploaded$datasetID <- values$uniqueidentifier
-        values$shape_uploaded_raw <- sf::st_as_sf(shape_uploaded)
+        values$shape_uploaded$datasetID <- values$uniqueidentifier
+        values$shape_uploaded_raw <- sf::st_as_sf(values$shape_uploaded)
 
       }
 
@@ -495,7 +516,9 @@ mod_submitData_server <- function(id,dockerVolume){
                               "###########################################")
 
         generate_report("Data sheet report", report_text, ns("download_zip_btn"), "Download outputs", "down")
-        report_text_data <<- report_text
+
+        # Text for report
+        values$report_text_data  <- report_text
       }
 
       # Adding UUID
@@ -505,7 +528,20 @@ mod_submitData_server <- function(id,dockerVolume){
       #Raw
       values$data_uploaded_raw <- input$data_file$datapath
 
-      output_zip_export <- paste0(values$uniqueidentifier)
+      #NAME!
+      country_unique <- unique(values$metadata_uploaded_export$countryCode)
+      yearBegin <- min(as.numeric(draftEW_uploaded$yearBeginDate))
+      yearEnd <- max(as.numeric(draftEW_uploaded$yearEndDate))
+      uuid <- unique(draftEW_uploaded$datasetID)
+      groupOfInterest <- unique(values$metadata_uploaded_export$taxonomicalGroupOfInterest)
+
+
+
+      values$output_zip_export <- paste0(country_unique,"_",
+                                         yearBegin,"_",
+                                         yearEnd,"_",
+                                         groupOfInterest,"_",
+                                         uuid,".zip")
 
     })
 
@@ -521,7 +557,7 @@ mod_submitData_server <- function(id,dockerVolume){
     # Download ZIP
     output$download_zip_btn <- downloadHandler(
       filename = function() {
-        paste0(output_zip_export) # Zip name
+        paste0(values$output_zip_export) # Zip name
       },
       content = function(file) {
         temp_zip <- tempfile(fileext = ".zip")
@@ -532,27 +568,28 @@ mod_submitData_server <- function(id,dockerVolume){
         }
 
         # Raws
-        file.copy(data_uploaded_raw, "raw/wldm_raw.xlsx")
+        file.copy(values$data_uploaded_raw, "raw/wldm_raw.xlsx")
 
         # Check if shape_uploaded_raw exists and is an sf object
-        if (exists("shape_uploaded_raw") && isTRUE(inherits(shape_uploaded_raw, "sf"))) {
-          sf::st_write(shape_uploaded_raw, "raw/spatial.gpkg", append = FALSE)
+        if (!is.null(values$shape_uploaded_raw) && isTRUE(inherits(values$shape_uploaded_raw, "sf"))) {
+          sf::st_write(values$shape_uploaded_raw, "raw/spatial.gpkg", append = FALSE)
         }
 
-        if (exists("dsa_file_raw")) {
-          file.copy(dsa_file_raw, "dsa.pdf")
+        if (!is.null(values$dsa_file_raw)) {
+          file.copy(values$dsa_file_raw, "dsa.pdf")
         }
 
         # Creating CSV files and reports_resume.txt
-        sf::st_write(draftEW_uploaded_export, "data.gpkg")
-        write.csv(metadata_uploaded_export, "metadata.csv", row.names = FALSE)
-        reports_resume <- paste(report_text_submission, report_text_metadata, report_text_data, collapse = "\n")
+        sf::st_write(values$draftEW_uploaded_export, "data.gpkg")
+        write.csv(values$metadata_uploaded_export, "metadata.csv", row.names = FALSE)
+
+        reports_resume <- paste(values$report_text_submissionPanel, values$report_text_metadata, values$report_text_data, collapse = "\n")
         writeLines(reports_resume, "reports_resume.txt")
 
         # Adding Files to ZIP
         zip(zipfile = temp_zip, files = c("data.gpkg", "metadata.csv", "reports_resume.txt", "raw"))
 
-        if (exists("dsa_file_raw")) {
+        if (!is.null(values$dsa_file_raw)) {
           zip(zipfile = temp_zip, files = "dsa.pdf")
         }
 
@@ -560,7 +597,7 @@ mod_submitData_server <- function(id,dockerVolume){
         file.remove("data.gpkg", "metadata.csv", "reports_resume.txt")
 
 
-        if (exists("dsa_file_raw")) {
+        if (!is.null(values$dsa_file_raw)) {
           file.remove("dsa.pdf")
         }
 
