@@ -4,24 +4,26 @@ enetwildIVT is an R package that contain a golemized shinyapp to validate the ha
 
 ## Installation
 
-You can install enetwildR from GitHub using the devtools package:
+To install locally the Dockerized ShinyApp go to the releases section on this repository and download from the latest one:
 
-```r
-devtools::install_github("IREC-CSIC-UCLM/enetwildIVT")
-```
+- .tar.gz file containing the shinyapp as an Rpackage
+- Dockerfile for dependencies
+- README with commands
 
 ## Usage
 
-First, load the package:
+To use this docker image you first need to have installed docker, here you can find more information regarding Docker instalation: https://docs.docker.com/engine/install/
 
-```r
-library(enetwildIVT)
+Once you have it, build the enetwildIVT image using this command:
+
+```sh
+sudo docker build -t enetwildivt
 ```
 
-To run the shinyapp just execute the run_app fun:
+To run the shinyapp just execute this run image command: 
 
-```r
-enetwildIVT::run_app()
+```sh
+sudo docker run -p 3838:3838 -v /opt/enetwildIVT:/opt/enetwildIVT enetwildivt:latest
 ```
 
 ## Issues
