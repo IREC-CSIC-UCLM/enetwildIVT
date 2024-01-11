@@ -55,7 +55,7 @@ mod_submitData_ui <- function(id){
 
       #download template
       tags$div(style = "text-align: center;",
-               downloadButton("downloadData", label = "Download template (WLDM)", class = "btn-primary")
+               downloadButton(ns("downloadData"), label = "Download template (WLDM)", class = "btn-primary")
       ),
 
     ),
@@ -105,7 +105,6 @@ mod_submitData_ui <- function(id){
         )
       ),
 
-      uiOutput(ns("shapefile_inputs")), #?
 
       fluidRow(
         column(6,
@@ -175,11 +174,9 @@ mod_submitData_server <- function(id,dockerVolume){
 
     # Download btn WLDM
     output$downloadData <- downloadHandler(
-      filename = function() {
-        "WLDM.xlsx"
-      },
+      filename = function() { "WLDM.xlsx" },
       content = function(file) {
-        file.copy(paste0(dockerVolume,"/WLDM.xlsx", file))
+        file.copy(file.path(dockerVolume, "WLDM.xlsx"), file)
       }
     )
 
@@ -369,7 +366,7 @@ mod_submitData_server <- function(id,dockerVolume){
       rownames(metadata_uploaded) <- metadata_uploaded$code
 
       # Validate metadata
-      metadata_check <- validate_metadata(metadata_uploaded, readRDS("inst/extdata/metadata_dict.rds"))
+      metadata_check <- validate_metadata(metadata_uploaded, readRDS(paste0(dockerVolume,"/metadata_dict.rds")))
 
       # Fail
       if (!TRUE %in% metadata_check) {
@@ -475,7 +472,7 @@ mod_submitData_server <- function(id,dockerVolume){
       draftEW_uploaded <- draftEW_uploaded[hasValue, ]
 
       # Validation
-      data_check <- validate_data(draftEW_uploaded, readRDS("inst/extdata/draftEW_dict.rds"))
+      data_check <- validate_data(draftEW_uploaded, readRDS(paste0(dockerVolume,"/draftEW_dict.rds")))
 
       # Data Summary
       elementToRemove <- "locationID"
@@ -560,6 +557,19 @@ mod_submitData_server <- function(id,dockerVolume){
         paste0(values$output_zip_export) # Zip name
       },
       content = function(file) {
+
+        removeModal()
+
+        # Show a loading modal
+        showModal(modalDialog(
+          title = "Please Wait",
+          paste(
+            "Please be patient. The pop-up will close once the data is ready for download.",
+            sep = "\n"
+          ),
+          easyClose = FALSE
+        ))
+
         temp_zip <- tempfile(fileext = ".zip")
 
         # Creating raw/ directory and copying files
@@ -572,6 +582,12 @@ mod_submitData_server <- function(id,dockerVolume){
 
         # Check if shape_uploaded_raw exists and is an sf object
         if (!is.null(values$shape_uploaded_raw) && isTRUE(inherits(values$shape_uploaded_raw, "sf"))) {
+
+          #Rm Fid if exist
+          if ("fid" %in% names(values$shape_uploaded_raw)) {
+            values$shape_uploaded_raw$fid <- NULL
+          }
+
           sf::st_write(values$shape_uploaded_raw, "raw/spatial.gpkg", append = FALSE)
         }
 
@@ -605,6 +621,9 @@ mod_submitData_server <- function(id,dockerVolume){
 
         # Copying zip to output file
         file.copy(temp_zip, file)
+
+
+        removeModal()
       }
     )
 

@@ -11,7 +11,7 @@
 #'
 #' @export
 globalFunction <- function() {
-  library(enetwildDET)
+  library(enetwildIVT)
 
   print("global.R loading")
 

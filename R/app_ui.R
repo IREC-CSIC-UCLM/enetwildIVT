@@ -27,7 +27,7 @@ app_ui <- function(request) {
       # Header
       tags$p(titlePanel(title = div(
         img(src = "www/EFSA_logo.png", height = "60px", hspace = "50px"),
-        "Integrated Validation Tool (v0.0.1)", #VERSION!
+        "Integrated Validation Tool (v1.0.0)", #VERSION!
         img(src = "www/logo-enetwild.jpg", height = "60px", hspace = "50px"),
 
         # Useful links

@@ -19,7 +19,7 @@ app_server <- function(input, output, session, dockerVolume  = '/opt/enetwildIVT
   # Manual download #
   observeEvent(input$manualLink, {
     showModal(modalDialog(
-      tags$iframe(src = "www/enetwildDET-manual.pdf",
+      tags$iframe(src = "www/manual_IVT.pdf",
                   width = 860, height = 600),
       size = "l", easyClose = TRUE
     ))
