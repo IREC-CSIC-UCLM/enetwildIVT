@@ -14,16 +14,22 @@ To install locally the Dockerized ShinyApp go to the releases section on this re
 
 To use this docker image you first need to have installed docker, here you can find more information regarding Docker instalation: https://docs.docker.com/engine/install/
 
-Once you have it, build the enetwildIVT image using this command:
+Using your terminal, go to the directory where you have your three downloaded files.
 
 ```sh
-sudo docker build -t enetwildivt
+cd your/directory/path
 ```
 
-To run the shinyapp just execute this run image command: 
+Once you are there, build the enetwildIVT image using this command:
 
 ```sh
-sudo docker run -p 3838:3838 -v /opt/enetwildIVT:/opt/enetwildIVT enetwildivt:latest
+docker build -t enetwildivt
+```
+
+To run the shinyapp just execute this docker run command: 
+
+```sh
+docker run -p 3838:3838 -v /opt/enetwildIVT:/opt/enetwildIVT enetwildivt:latest
 ```
 
 ## Issues
