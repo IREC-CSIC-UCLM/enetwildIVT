@@ -5,7 +5,6 @@
 # globalR function: copy data to Docker volume
 ###############################################################################
 
-
 #' Global function - run before serverFunction and uiFunction
 #' @return no return value
 #'
@@ -28,22 +27,22 @@ globalFunction <- function() {
     "metadata_dict.rds"
   )
 
-
   for (fileName in volumeFiles) {
     iFile <- list.files(dataDir, pattern = fileName, full.names = TRUE)
+    destFile <- file.path(dockerVolume, basename(iFile))
 
-    if (!file.exists(file.path(dockerVolume, basename(iFile)))){
-      if(file.info(iFile)$isdir == FALSE) {
+    # Substitute
+    if (!file.exists(destFile) || file.info(iFile)$mtime > file.info(destFile)$mtime) {
+      if (file.info(iFile)$isdir == FALSE) {
         file.copy(from = iFile,
-                  to = file.path(dockerVolume, basename(iFile)), overwrite = TRUE)
+                  to = destFile, overwrite = TRUE)
+        print(paste("File copied:", fileName))
       }
     }
   }
-
 
   # After copying, show the list of files in dockerVolume
   copiedFiles <- list.files(dockerVolume)
   print("Files copied to dockerVolume:")
   print(copiedFiles)
 }
-
