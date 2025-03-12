@@ -27,7 +27,7 @@ app_ui <- function(request) {
       # Header
       tags$p(titlePanel(title = div(
         img(src = "www/EFSA_logo.png", height = "60px", hspace = "50px"),
-        "Integrated Validation Tool (v1.1.0)", #VERSION!
+        "Integrated Validation Tool (v1.2.0)", #VERSION!
         img(src = "www/logo-enetwild.jpg", height = "60px", hspace = "50px"),
 
         # Useful links
@@ -54,7 +54,7 @@ app_ui <- function(request) {
                      # Horizontal line
                      hr(),
                      # Footer content
-                     HTML("&copy; 2023 IVT | "),
+                     HTML("&copy; 2025 IVT | "),
                      a(href = "https://twitter.com/enetwild", "Twitter"),
                      HTML(" | "),
                      a(href = "https://enetwild.com/", "Contact Us")

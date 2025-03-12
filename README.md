@@ -2,7 +2,22 @@
 
 enetwildIVT is an R package that contain a golemized shinyapp to validate the harmonized databases provided by the partners of the ENEWTILD proyect.
 
-## Installation
+
+## Local installation as R package (v1.2.0 and newer versions)
+
+To download and install the app run the following R commands:
+
+```R
+remotes::install_github("IREC-CSIC-UCLM/enetwildIVT")
+```
+
+Launch the app using: 
+
+```R
+enetwildIVT::run_app()
+```
+
+## Installation using Docker (v1.1.0 and older versions)
 
 To install locally the Dockerized ShinyApp go to the releases section on this repository and download from the latest one:
 

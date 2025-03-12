@@ -55,7 +55,7 @@ mod_submitData_ui <- function(id){
 
       #download template
       tags$div(style = "text-align: center;",
-               downloadButton(ns("downloadData"), label = "Download template (WLDM)", class = "btn-primary")
+               downloadButton(ns("downloadData"), label = "Download template (WLDM_2.2)", class = "btn-primary")
       ),
 
     ),
@@ -174,12 +174,13 @@ mod_submitData_server <- function(id,dockerVolume){
 
     # Download btn WLDM
     output$downloadData <- downloadHandler(
-      filename = function() { "WLDM.xlsx" },
+      filename = function() {"WLDM_2.2.xlsx"},
       content = function(file) {
-        file.copy(file.path(dockerVolume, "WLDM.xlsx"), file)
+        origen <- system.file("extdata", "WLDM_2.2.xlsx", package = "enetwildIVT")
+        file.copy(origen, file)
       }
     )
-
+    
     ##############################
     # Changes on submission panel
     ##############################
@@ -207,9 +208,6 @@ mod_submitData_server <- function(id,dockerVolume){
         shinyjs::show("data_agreement")
       }
     })
-
-
-
 
 
     ###############
@@ -366,7 +364,10 @@ mod_submitData_server <- function(id,dockerVolume){
       rownames(metadata_uploaded) <- metadata_uploaded$code
 
       # Validate metadata
-      metadata_check <- validate_metadata(metadata_uploaded, readRDS(paste0(dockerVolume,"/metadata_dict.rds")))
+      metadata_check <- validate_metadata(
+        metadata_uploaded,
+        readRDS(system.file("extdata", "metadata_dict.rds", package = "enetwildIVT"))
+      )
 
       # Fail
       if (!TRUE %in% metadata_check) {
@@ -472,8 +473,11 @@ mod_submitData_server <- function(id,dockerVolume){
       draftEW_uploaded <- draftEW_uploaded[hasValue, ]
 
       # Validation
-      data_check <- validate_data(draftEW_uploaded, readRDS(paste0(dockerVolume,"/draftEW_dict.rds")))
-
+      data_check <- validate_data(
+        draftEW_uploaded,
+        readRDS(system.file("extdata", "draftEW_dict.rds", package = "enetwildIVT"))
+      )
+      
       # Data Summary
       elementToRemove <- "locationID"
       sumcols <- setdiff(sumcols, elementToRemove)
