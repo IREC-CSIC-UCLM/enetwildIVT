@@ -1,5 +1,0 @@
-Future versions (2.0) can include:
-
-- Admin tab for updatin dictionaries and guides
-- reviewer info as .csv on .zip output
-- autosending the zip instead of only downloading it
