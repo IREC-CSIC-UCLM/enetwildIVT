@@ -14,6 +14,8 @@ globalFunction <- function() {
 
   print("global.R loading")
 
+  a
+
   ##### Docker volume
   dockerVolume <- "/opt/enetwildIVT"
 
