@@ -12,6 +12,7 @@ Imports:
     uuid,
     readxl,
     sf,
+    zip,
     dplyr,
     purrr
 Encoding: UTF-8

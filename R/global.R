@@ -13,6 +13,8 @@ globalFunction <- function() {
   library(enetwildIVT)
 
   print("global.R loading")
+  
+  print("newzip")
 
   options(shiny.http.response.timeout = 3600) #timeout
 

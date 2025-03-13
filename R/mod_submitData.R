@@ -546,11 +546,6 @@ mod_submitData_server <- function(id,dockerVolume){
 
     })
 
-
-
-
-
-
     ####################
     # Output generation
     ####################
@@ -604,19 +599,28 @@ mod_submitData_server <- function(id,dockerVolume){
           sf::st_write(values$draftEW_uploaded_export, "data.gpkg")
           write.csv(values$metadata_uploaded_export, "metadata.csv", row.names = FALSE)
           
-          reports_resume <- paste(values$report_text_submissionPanel,
-                                  values$report_text_metadata,
-                                  values$report_text_data,
-                                  collapse = "\n")
+          reports_resume <- paste(
+            values$report_text_submissionPanel,
+            values$report_text_metadata,
+            values$report_text_data,
+            collapse = "\n"
+          )
           writeLines(reports_resume, "reports_resume.txt")
           
           # Combine all files to be zipped into one vector
-          incProgress(0.1, detail = "Adding files to ZIP")
+          incProgress(0.1, detail = "Preparing files for ZIP")
           files_to_zip <- c("data.gpkg", "metadata.csv", "reports_resume.txt", "raw")
           if (!is.null(values$dsa_file_raw)) {
             files_to_zip <- c(files_to_zip, "dsa.pdf")
           }
-          zip(zipfile = temp_zip, files = files_to_zip)
+          
+          # Use the 'zip' package to create the ZIP (works better on Windows)!
+          incProgress(0.1, detail = "Zipping files")
+          zip::zipr(
+            zipfile = temp_zip,
+            files = files_to_zip,
+            recurse = TRUE  # ensure directories are included
+          )
           
           # Clean up temporary files and directories
           incProgress(0.1, detail = "Cleaning up temporary files")
