@@ -554,85 +554,88 @@ mod_submitData_server <- function(id,dockerVolume){
     ####################
     # Output generation
     ####################
-
+    
     # Download ZIP
     output$download_zip_btn <- downloadHandler(
       filename = function() {
-        paste0(values$output_zip_export) # Zip name
+        paste0(values$output_zip_export)  # Zip file name
       },
       content = function(file) {
-
+        
+        # Remove any previous modal
         removeModal()
-
-        # Show a loading modal
+        
+        # Show an initial modal (optional, as withProgress shows the progress bar)
         showModal(modalDialog(
           title = "Please Wait",
-          paste(
-            "Please be patient. The pop-up will close once the data is ready for download.",
-            sep = "\n"
-          ),
+          "Processing your request. Please be patient until the download is ready.",
           easyClose = FALSE
         ))
-
-        temp_zip <- tempfile(fileext = ".zip")
-
-        # Creating raw/ directory and copying files
-        if (!dir.exists("raw")) {
-          dir.create("raw")
-        }
-
-        # Raws
-        file.copy(values$data_uploaded_raw, "raw/wldm_raw.xlsx")
-
-        # Check if shape_uploaded_raw exists and is an sf object
-        if (!is.null(values$shape_uploaded_raw) && isTRUE(inherits(values$shape_uploaded_raw, "sf"))) {
-
-          #Rm Fid if exist
-          if ("fid" %in% names(values$shape_uploaded_raw)) {
-            values$shape_uploaded_raw$fid <- NULL
+        
+        withProgress(message = "Processing...", value = 0, {
+          
+          incProgress(0.1, detail = "Preparing temporary ZIP file")
+          temp_zip <- tempfile(fileext = ".zip")
+          
+          incProgress(0.1, detail = "Creating 'raw' directory")
+          if (!dir.exists("raw")) {
+            dir.create("raw")
           }
-
-          sf::st_write(values$shape_uploaded_raw, "raw/spatial.gpkg", append = FALSE)
-        }
-
-        if (!is.null(values$dsa_file_raw)) {
-          file.copy(values$dsa_file_raw, "dsa.pdf")
-        }
-
-        # Creating CSV files and reports_resume.txt
-        sf::st_write(values$draftEW_uploaded_export, "data.gpkg")
-        write.csv(values$metadata_uploaded_export, "metadata.csv", row.names = FALSE)
-
-        reports_resume <- paste(values$report_text_submissionPanel, values$report_text_metadata, values$report_text_data, collapse = "\n")
-        writeLines(reports_resume, "reports_resume.txt")
-
-        # Adding Files to ZIP
-        zip(zipfile = temp_zip, files = c("data.gpkg", "metadata.csv", "reports_resume.txt", "raw"))
-
-        if (!is.null(values$dsa_file_raw)) {
-          zip(zipfile = temp_zip, files = "dsa.pdf")
-        }
-
-        # Removing temp files and directories
-        file.remove("data.gpkg", "metadata.csv", "reports_resume.txt")
-
-
-        if (!is.null(values$dsa_file_raw)) {
-          file.remove("dsa.pdf")
-        }
-
-        unlink("raw", recursive = TRUE)
-
-        # Copying zip to output file
-        file.copy(temp_zip, file)
-
-
+          
+          incProgress(0.1, detail = "Copying raw Excel file")
+          file.copy(values$data_uploaded_raw, "raw/wldm_raw.xlsx")
+          
+          # Process spatial data if it exists and is an sf object
+          if (!is.null(values$shape_uploaded_raw) && isTRUE(inherits(values$shape_uploaded_raw, "sf"))) {
+            if ("fid" %in% names(values$shape_uploaded_raw)) {
+              values$shape_uploaded_raw$fid <- NULL
+            }
+            incProgress(0.1, detail = "Writing spatial data")
+            sf::st_write(values$shape_uploaded_raw, "raw/spatial.gpkg", append = FALSE)
+          }
+          
+          # Copy DSA file if it exists
+          if (!is.null(values$dsa_file_raw)) {
+            incProgress(0.1, detail = "Copying DSA file")
+            file.copy(values$dsa_file_raw, "dsa.pdf")
+          }
+          
+          incProgress(0.1, detail = "Creating data files")
+          sf::st_write(values$draftEW_uploaded_export, "data.gpkg")
+          write.csv(values$metadata_uploaded_export, "metadata.csv", row.names = FALSE)
+          
+          reports_resume <- paste(values$report_text_submissionPanel,
+                                  values$report_text_metadata,
+                                  values$report_text_data,
+                                  collapse = "\n")
+          writeLines(reports_resume, "reports_resume.txt")
+          
+          # Combine all files to be zipped into one vector
+          incProgress(0.1, detail = "Adding files to ZIP")
+          files_to_zip <- c("data.gpkg", "metadata.csv", "reports_resume.txt", "raw")
+          if (!is.null(values$dsa_file_raw)) {
+            files_to_zip <- c(files_to_zip, "dsa.pdf")
+          }
+          zip(zipfile = temp_zip, files = files_to_zip)
+          
+          # Clean up temporary files and directories
+          incProgress(0.1, detail = "Cleaning up temporary files")
+          file.remove("data.gpkg", "metadata.csv", "reports_resume.txt")
+          if (!is.null(values$dsa_file_raw)) {
+            file.remove("dsa.pdf")
+          }
+          unlink("raw", recursive = TRUE)
+          
+          # Copy the temporary ZIP file to the final output file
+          incProgress(0.1, detail = "Finalizing download")
+          file.copy(temp_zip, file)
+          incProgress(0.1, detail = "Done")
+        })
+        
         removeModal()
       }
     )
-
-
-
+    
 
   })
 }

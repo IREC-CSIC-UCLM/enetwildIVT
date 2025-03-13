@@ -14,6 +14,8 @@ globalFunction <- function() {
 
   print("global.R loading")
 
+  options(shiny.http.response.timeout = 3600) #timeout
+
   # ##### Docker volume
   # dockerVolume <- "/opt/enetwildIVT"
   # 
