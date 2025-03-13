@@ -1,7 +1,7 @@
 Package: enetwildIVT
 Title: ENETWILD Integrated Validation Tool
 Version: 1.2.0
-Authors@R: person('Sergio', 'López', email = 'sergio.lopez@uclm.es', role = c('cre', 'aut'))
+Authors@R: person('Sergio', 'López-Padilla', email = 'sergiolp@ugr.es', role = c('cre', 'aut'))
 Description: Rpackage that contains the IVT Shinyapp.
 License: MIT
 Imports: 
